@@ -1,7 +1,7 @@
 # AI 视频通话文本质检小工具
 
 一个基于 Gradio 的轻量化 AI 文本质检工具，用于视频通话文本的质量检查。
-
+作者主页 https://space.bilibili.com/292001394
 ## 功能特点
 
 - ✅ 简洁的 Gradio Web 界面
@@ -81,3 +81,4 @@ python app.py
 - 确保上传的文本文件为 UTF-8 编码
 - 词库文件 `check_words.txt` 必须存在
 - 支持的文件格式：.txt
+
