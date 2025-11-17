@@ -4,7 +4,60 @@
 """
 
 import os
-from typing import List
+import csv
+from typing import List, Tuple
+
+# ========== 新增：读取 CSV 格式词库 ==========
+def load_check_words_from_csv(csv_file_path: str) -> Tuple[List[str], List[str]]:
+    """
+    从 CSV 文件读取违规/无效词库
+    参数：csv_file_path - CSV 文件路径
+    返回：(违规词列表, 无效词列表)
+    """
+    try:
+        violation_words = []
+        invalid_words = []
+        
+        with open(csv_file_path, 'r', encoding='utf-8') as f:
+            # 读取 CSV 文件
+            reader = csv.DictReader(f)
+            
+            # 检查列名是否存在
+            if reader.fieldnames is None:
+                raise ValueError("CSV 文件为空")
+            
+            # 查找包含 "Restricted" 和 "Invalid" 的列名（不区分大小写）
+            restricted_col = None
+            invalid_col = None
+            
+            for col in reader.fieldnames:
+                col_lower = col.lower()
+                if 'restrict' in col_lower or '违规' in col_lower:
+                    restricted_col = col
+                if 'invalid' in col_lower or '无效' in col_lower:
+                    invalid_col = col
+            
+            if not restricted_col or not invalid_col:
+                raise ValueError("CSV 格式错误，请确保包含违规词和无效词列")
+            
+            # 读取每一行数据
+            for row in reader:
+                # 读取违规词
+                if restricted_col in row and row[restricted_col].strip():
+                    word = row[restricted_col].strip().rstrip(':：')  # 去除冒号
+                    if word and word not in violation_words:
+                        violation_words.append(word)
+                
+                # 读取无效词
+                if invalid_col in row and row[invalid_col].strip():
+                    word = row[invalid_col].strip()
+                    if word and word not in invalid_words:
+                        invalid_words.append(word)
+        
+        return violation_words, invalid_words
+    
+    except Exception as e:
+        raise Exception(f"CSV 文件读取失败：{str(e)}")
 
 # ========== 第一步：读取词库文件 ==========
 def load_check_words(words_file_path: str = "check_words.txt") -> tuple:
@@ -89,16 +142,22 @@ def check_sentence(sentence: str, violation_words: List[str], invalid_words: Lis
     
     return result
 
-# ========== 第四步：主质检函数 ==========
-def start_quality_check(uploaded_text_path: str) -> List[str]:
+# ========== 第四步：主质检函数（新增 CSV 支持） ==========
+def start_quality_check(uploaded_text_path: str, csv_words_path: str = None) -> List[str]:
     """
-    核心质检函数
+    核心质检函数（支持 CSV 和 TXT 词库）
     参数：uploaded_text_path - 上传文件的路径
+          csv_words_path - CSV 词库文件路径（可选，优先使用）
     返回：质检结果列表
     """
     try:
-        # 1. 加载词库
-        violation_words, invalid_words = load_check_words()
+        # 1. 加载词库（优先使用 CSV，否则使用默认 TXT）
+        if csv_words_path and os.path.exists(csv_words_path):
+            # 使用用户上传的 CSV 词库
+            violation_words, invalid_words = load_check_words_from_csv(csv_words_path)
+        else:
+            # 使用默认的 TXT 词库
+            violation_words, invalid_words = load_check_words()
         
         # 2. 读取上传文本
         sentences = load_uploaded_text(uploaded_text_path)
