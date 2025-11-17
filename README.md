@@ -71,9 +71,9 @@ python app.py
 #### CSV 词库格式（Prohibited words.CSV）
 | No. | Restricted words | Invalid Words |
 |-----|------------------|---------------|
-| 1   | 法伦             | 嗯            |
-| 2   | 法輪功           | 啊            |
-| 3   | 违法             | 那个          |
+| 1   | xx               | 嗯            |
+| 2   | xx               | 啊            |
+| 3   | xx               | 那个          |
 
 **注意：** CSV 文件必须包含 "Restricted words"（违规词）和 "Invalid Words"（无效词）列。
 
@@ -165,3 +165,4 @@ python app.py
 ---
 
 **⭐ 如果这个工具对你有帮助，欢迎 Star 支持！**
+
